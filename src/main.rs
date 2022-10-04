@@ -169,8 +169,8 @@ fn eval(expr: Expr) -> bool {
         Expr::UnaryOp(kind, expr) => match kind {
             UnaryOpKind::Not => !eval(*expr),
         }
+        Expr::Literal(literal) => literal,
         Expr::Identifier(identifier) => todo!(),
-        Expr::Literal(literal) => literal
     }
 }
 
