@@ -152,18 +152,33 @@ impl Expr {
     }
 }
 
-fn parse(src: &str) {
+fn parse(src: &str) -> Expr {
     let mut parser = Parser::new(src.to_string());
     let expr = parser.parse_expr();
     assert_eq!(parser.peek(), TokenKind::Eof);
     println!("{}:\n{:#?}", src, expr);
+    expr
+}
+
+fn eval(expr: Expr) -> bool {
+    match expr {
+        Expr::BinaryOp(kind, pair) => match kind {
+            BinaryOpKind::Or => eval(pair.0) || eval(pair.1),
+            BinaryOpKind::And => eval(pair.0) && eval(pair.1),
+        }
+        Expr::UnaryOp(kind, expr) => match kind {
+            UnaryOpKind::Not => !eval(*expr),
+        }
+        Expr::Identifier(identifier) => todo!(),
+        Expr::Literal(literal) => literal
+    }
 }
 
 fn main() {
-    parse("1+0*0");
-    parse("0*0+1");
-    parse("(1+0)*(1*0)'");
-    parse("1*(1+(0*1))");
+    println!("{}", eval(parse("1+0*0")));
+    println!("{}", eval(parse("0*0+1")));
+    println!("{}", eval(parse("(1+0)*(1*0)'")));
+    println!("{}", eval(parse("1*(1+(0*1))")));
 
     for line in BufReader::new(std::io::stdin()).lines() {
         match line {
@@ -172,7 +187,9 @@ fn main() {
                     break;
                 }
 
-                parse(&input);
+                let expr = parse(&input);
+                println!("{:#?}", expr);
+                println!("{}", eval(expr));
             }
             Err(e) => println!("Failed to read stdin: {e}")
         }
